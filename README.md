@@ -19,7 +19,7 @@ UIView.animate(withDuration: 0.3, animations: { [weak self] in
 
             })
         })
-```swift
+```
 
 ### After
 
