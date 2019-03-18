@@ -1,8 +1,8 @@
 FluidAnimation is an animation library that provides a **fluid interface** around chaining complex iOS animations.
  
 <p align="center">
-    <a href="#quick start">Quick Start</a>
-    •<a href="#installation">Installation</a>
+    <a href="#quick-start">Quick Start</a>
+    • <a href="#installation">Installation</a>
 </p>
 
 
