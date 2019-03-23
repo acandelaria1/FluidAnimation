@@ -92,4 +92,4 @@ class ViewController: UIViewController {
 * Drag and drop Fluid.swift into your project.
 
 ## License
-FluidAnimation is released under the MIT license. 
+FluidAnimation is released under the MIT license. See [LICENSE](https://github.com/acandelaria1/FluidAnimation/blob/master/LICENSE) for details.
