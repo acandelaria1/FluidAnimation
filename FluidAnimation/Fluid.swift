@@ -8,10 +8,9 @@
 
 import UIKit
 
-fileprivate struct FluidAnimation {
-    let duration: TimeInterval
-    let animations: () -> Void
-    let completion: ((Bool) -> ())?
+fileprivate enum FluidAnimation {
+    case spring(duration: TimeInterval, delay: TimeInterval, damping: CGFloat, initialSpringVelocity: CGFloat, options: UIView.AnimationOptions, animations: () -> Void, completion: (()->Void)?)
+    case normal(duration: TimeInterval, animations: () -> Void, completion: (() -> Void)?)
 }
 
 fileprivate class FluidFactory {
@@ -29,16 +28,31 @@ fileprivate class FluidFactory {
     func chainAnimations() {
         guard !animations.isEmpty else { return }
         let animation = animations.removeFirst()
-        UIView.animate(withDuration: animation.duration, animations: animation.animations) { [weak self] _ in
-            self?.chainAnimations()
+        switch animation {
+        case .spring(duration: let duration, delay: let delay, damping: let damping, initialSpringVelocity: let springVelocity, options: let options, animations: let animations, completion: let completion):
+            UIView.animate(withDuration: duration, delay: delay, usingSpringWithDamping: damping, initialSpringVelocity: springVelocity, options: options, animations: animations, completion: { [weak self] _ in
+                completion?()
+                self?.chainAnimations()
+            })
+        case .normal(duration: let duration, animations: let animations, completion: let completion):
+            UIView.animate(withDuration: duration, animations: animations) { [weak self] _ in
+                completion?()
+                self?.chainAnimations()
+            }
         }
     }
 }
 
 class Fluid {
     
-    @discardableResult func animate(duration: TimeInterval, animation: @escaping () -> Void, completion: ((Bool) -> Void)? = nil) -> Fluid {
-        let animation = FluidAnimation(duration: duration, animations: animation, completion: completion)
+    @discardableResult func animateWithSpring(duration: TimeInterval, delay: TimeInterval, damping: CGFloat, springVelocity: CGFloat, options: UIView.AnimationOptions, animations: @escaping () -> Void, completion: (() -> Void)?) -> Fluid {
+        let animation = FluidAnimation.spring(duration: duration, delay: delay, damping: damping, initialSpringVelocity: springVelocity, options: options, animations: animations, completion: completion)
+        FluidFactory.shared.add(animation: animation)
+        return self
+    }
+    
+    @discardableResult func animate(duration: TimeInterval, animations: @escaping () -> Void, completion: (() -> Void)?) -> Fluid {
+        let animation = FluidAnimation.normal(duration: duration, animations: animations, completion: completion)
         FluidFactory.shared.add(animation: animation)
         return self
     }
