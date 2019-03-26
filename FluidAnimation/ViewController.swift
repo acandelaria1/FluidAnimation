@@ -10,6 +10,14 @@ import UIKit
 
 class ViewController: UIViewController {
     
+    var isAnimating = false {
+        didSet {
+            if !isAnimating {
+                animateCircle()
+            }
+        }
+    }
+    
     private var circle: UIView = {
         let circle = UIView()
         circle.translatesAutoresizingMaskIntoConstraints = false
@@ -34,17 +42,30 @@ class ViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-        
-        UIView.fluidly.animate(duration: 0.3, animation: { [weak self] in
+        animateCircle()
+    }
+    
+    private func animateCircle() {
+        guard !isAnimating else { return }
+        isAnimating = true
+        UIView.fluidly.animate(duration: 0.3, animations: { [weak self] in
             guard let strongSelf = self else { return }
             strongSelf.circle.transform = strongSelf.circle.transform.concatenating(CGAffineTransform(translationX: 0, y: 200))
-        }).animate(duration: 0.3, animation: { [weak self] in
-            guard let strongSelf = self else { return }
-            strongSelf.circle.transform = strongSelf.circle.transform.concatenating(CGAffineTransform(translationX: 100, y: 0))
-        }).animate(duration: 0.3, animation: { [weak self] in
-            guard let strongSelf = self else { return }
-            strongSelf.circle.transform = strongSelf.circle.transform.concatenating(CGAffineTransform(translationX: 0, y: -100))
-        }).start()
+            }, completion: nil)
+            .animate(duration: 0.3, animations: { [weak self] in
+                guard let strongSelf = self else { return }
+                strongSelf.circle.transform = strongSelf.circle.transform.concatenating(CGAffineTransform(translationX: 100, y: 0))
+                }, completion: nil)
+            .animate(duration: 0.3, animations: { [weak self] in
+                guard let strongSelf = self else { return }
+                strongSelf.circle.transform = strongSelf.circle.transform.concatenating(CGAffineTransform(translationX: 0, y: -200))
+                }, completion: nil)
+            .animateWithSpring(duration: 0.3, delay: 0.0, damping: 0.3, springVelocity: 1.0, options: .beginFromCurrentState, animations: { [weak self] in
+                self?.circle.transform = CGAffineTransform.identity
+                }, completion: { [weak self] in
+                    DispatchQueue.main.async { [weak self] in
+                        self?.isAnimating = false
+                    }
+            }).start()
     }
 }
